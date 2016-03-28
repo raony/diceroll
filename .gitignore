@@ -62,3 +62,5 @@ target/
 .ipynb_checkpoints
 db.sqlite3
 diceroll/staticfiles/
+
+.idea
