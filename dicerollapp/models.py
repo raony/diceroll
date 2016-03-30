@@ -20,6 +20,7 @@ class DiceRollManager(object):
 
 
 class DiceRoll(object):
+    manager = DiceRollManager()
 
     class _roll(object):
         def __init__(self, values):

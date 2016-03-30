@@ -11,4 +11,6 @@ class HomeTest(WebTest):
         response = self.app.get(reverse('home'))
         response.form['description'] = 'test description'
         response = response.form.submit()
-        self.fail('to be implemented')
+        response = response.follow()
+
+        self.assertContains(response, 'test description')
