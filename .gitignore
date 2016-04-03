@@ -64,3 +64,5 @@ db.sqlite3
 diceroll/staticfiles/
 
 .idea
+.env
+3rdparty

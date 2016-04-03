@@ -11,5 +11,12 @@
     {{ form.as_table }}
     <input type="submit" value="Create">
 </form>
+<ul>
+{% for roll in diceroll.rolls %}
+    <li>{{ roll.values|join:", " }}</li>
+{% endfor %}
+</ul>
+
+
 </body>
 </html>
