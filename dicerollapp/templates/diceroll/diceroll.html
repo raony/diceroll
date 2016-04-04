@@ -13,7 +13,7 @@
 </form>
 <ul>
 {% for roll in diceroll.rolls %}
-    <li>{{ roll.values|join:", " }}</li>
+    <li><b>{% if roll.successes > 0 %}Successes: {{ roll.successes }}{% else %}FAIL!{% endif %}</b> - {{ roll.values|join:", " }}</li>
 {% endfor %}
 </ul>
 

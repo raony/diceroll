@@ -99,3 +99,23 @@ class DiceRollViewTest(WebTest):
         roll = pickle.loads(result['pickled_obj'])
         self.assertEqual(1, len(roll.rolls))
         self.assertContains(response, ', '.join([unicode(v) for v in roll.rolls[0].values]))
+
+    @mock.patch('random.randint')
+    def test_post_success(self, randint, redis):
+        randint.return_value = 8
+        roll = DiceRoll('description test')
+        roll.roll(1)
+        DiceRollManager.get_manager().redis.get.return_value = pickle.dumps(roll)
+
+        response = self.app.get(reverse('diceroll', kwargs={'id': roll.GUID}))
+        self.assertContains(response, "Successes: 1")
+
+    @mock.patch('random.randint')
+    def test_post_fail(self, randint, redis):
+        randint.return_value = 7
+        roll = DiceRoll('description test')
+        roll.roll(1)
+        DiceRollManager.get_manager().redis.get.return_value = pickle.dumps(roll)
+
+        response = self.app.get(reverse('diceroll', kwargs={'id': roll.GUID}))
+        self.assertContains(response, "FAIL!")
