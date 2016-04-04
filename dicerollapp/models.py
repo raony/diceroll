@@ -56,4 +56,4 @@ class DiceRoll(object):
         return result + self._roll_with_explode(exploded)
 
     def roll(self, dices):
-        self.rolls.append(_roll(self._roll_with_explode(dices)))
+        self.rolls.insert(0, _roll(self._roll_with_explode(dices)))
