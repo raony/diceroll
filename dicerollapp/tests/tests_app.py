@@ -64,12 +64,13 @@ class HomeTest(WebTest):
 class DiceRollViewTest(WebTest):
     def setUp(self):
         DiceRollManager._instance = None
-        
+
     def test_get_view(self, redis):
         roll = DiceRoll('description test')
         DiceRollManager.get_manager().redis.get.return_value = pickle.dumps(roll)
         response = self.app.get(reverse('diceroll', kwargs={'id': roll.GUID}))
         DiceRollManager.get_manager().redis.get.assert_called_with(roll.GUID)
+        self.assertContains(response, reverse('diceroll', kwargs={'id': roll.GUID}))
 
     def test_get_not_found(self, redis):
         DiceRollManager.get_manager().redis.get.return_value = None

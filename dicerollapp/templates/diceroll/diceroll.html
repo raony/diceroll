@@ -5,7 +5,7 @@
     <title>DiceRoll</title>
 </head>
 <body>
-<h5>Diceroll: {{ diceroll.description }}</h5>
+<h5>Diceroll: <a href="{% url 'diceroll' id=diceroll.GUID %}">{{ diceroll.description }}</a></h5>
 <form method="post">
     {% csrf_token %}
     {{ form.as_table }}
