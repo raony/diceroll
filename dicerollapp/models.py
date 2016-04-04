@@ -9,10 +9,13 @@ import redis as redismodule
 import pickle
 
 class DiceRollManager(object):
+    _instance = None
 
     @classmethod
-    def new_diceroll_manager(cls):
-        return DiceRollManager(redismodule.from_url(os.environ.get("REDIS_URL")))
+    def get_manager(cls):
+        if not cls._instance:
+            cls._instance = cls(redismodule.from_url(os.environ.get("REDIS_URL")))
+        return cls._instance
 
     def __init__(self, redis):
         self.redis = redis
@@ -23,7 +26,10 @@ class DiceRollManager(object):
         return diceroll
 
     def get(self, GUID):
-        return pickle.loads(self.redis.get(GUID))
+        try:
+            return pickle.loads(self.redis.get(GUID))
+        except:
+            return None
 
     def save(self, diceroll):
         return self.redis.set(diceroll.GUID, pickle.dumps(diceroll))
