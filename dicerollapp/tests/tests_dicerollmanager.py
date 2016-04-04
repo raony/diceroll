@@ -51,3 +51,12 @@ class DiceRollManagerTest(TestCase):
         db_roll = target.get(roll.GUID)
         self.assertEqual(db_roll.description, roll.description)
         self.assertEqual(db_roll.rolls[0].values, roll.rolls[0].values)
+
+    def test_iter(self):
+        redis = mock.MagicMock()
+
+        target = DiceRollManager(redis)
+
+        redis.scan_iter.return_value = [1, 2, 3, 4, 5]
+
+        self.assertEqual([1, 2, 3, 4, 5], [x for x in target.keys()])

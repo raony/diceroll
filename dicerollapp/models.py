@@ -34,6 +34,10 @@ class DiceRollManager(object):
     def save(self, diceroll):
         return self.redis.set(diceroll.GUID, pickle.dumps(diceroll))
 
+    def keys(self):
+        for key in self.redis.scan_iter():
+            yield key
+
 
 class _roll(object):
     def __init__(self, values):

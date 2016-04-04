@@ -11,5 +11,10 @@
     {{ form.as_table }}
     <input type="submit" value="Create">
 </form>
+<ul>
+{% for roll in rolls %}
+<li><a href="{% url 'diceroll' id=roll.GUID %}">{{ roll.description }}</a></li>
+{% endfor %}
+</ul>
 </body>
 </html>

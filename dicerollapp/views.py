@@ -10,7 +10,11 @@ def home(request):
         if form.is_valid():
             obj = DiceRollManager.get_manager().create(form.cleaned_data['description'])
             return redirect('diceroll', id=unicode(obj.GUID))
-    return render(request, 'diceroll/home.html', {'form' : form})
+    return render(request, 'diceroll/home.html', {
+        'form' : form,
+        'rolls' : [DiceRollManager.get_manager().get(k) for k in
+            DiceRollManager.get_manager().keys()]
+    })
 
 def diceroll(request, id):
     obj = DiceRollManager.get_manager().get(id)

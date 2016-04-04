@@ -7,34 +7,54 @@ import pickle
 
 from dicerollapp.models import DiceRoll, DiceRollManager
 
-
+@mock.patch('redis.from_url')
 class HomeTest(WebTest):
-    def test_display_new_diceroll_form_on_home(self):
+    def setUp(self):
+        DiceRollManager._instance = None
+
+    def test_display_new_diceroll_form_on_home(self, redis):
+        roll1 = DiceRoll('desc1')
+        roll2 = DiceRoll('desc2')
+        roll3 = DiceRoll('desc3')
+
+
+        DiceRollManager.get_manager().redis.scan_iter.return_value = \
+            [roll1.GUID, roll2.GUID, roll3.GUID]
+        DiceRollManager.get_manager().redis.get.side_effect = [
+            pickle.dumps(x) for x in [roll1, roll2, roll3]
+        ]
         response = self.app.get(reverse('home'))
         self.assertIsNotNone(response.form)
 
-    @mock.patch('redis.from_url')
+        self.assertContains(response, reverse('diceroll', kwargs={'id': roll1.GUID}))
+        self.assertContains(response, roll1.description)
+        self.assertContains(response, reverse('diceroll', kwargs={'id': roll2.GUID}))
+        self.assertContains(response, roll2.description)
+        self.assertContains(response, reverse('diceroll', kwargs={'id': roll3.GUID}))
+        self.assertContains(response, roll3.description)
+
     def test_form_submit(self, redis):
-        pickled_result = []
-        guid_result = []
+        result = {}
         def set_stub(guid, pickled_obj):
-            pickled_result.append(pickled_obj)
-            guid_result.append(guid)
+            result['pickled_obj'] = pickled_obj
+            result['guid'] = guid
         DiceRollManager.get_manager().redis.set.side_effect = set_stub
+        DiceRollManager.get_manager().redis.scan_iter.return_value = []
 
         response = self.app.get(reverse('home'))
         response.form['description'] = 'test description'
         response = response.form.submit()
 
         DiceRollManager.get_manager().redis.set.assert_called_with(mock.ANY, mock.ANY)
-        DiceRollManager.get_manager().redis.get.return_value = pickled_result[0]
+        DiceRollManager.get_manager().redis.get.return_value = result['pickled_obj']
 
         response = response.follow()
 
-        DiceRollManager.get_manager().redis.get.assert_called_with(guid_result[0])
+        DiceRollManager.get_manager().redis.get.assert_called_with(result['guid'])
         self.assertContains(response, 'test description')
 
-    def test_form_submit_empty_error(self):
+    def test_form_submit_empty_error(self, redis):
+        DiceRollManager.get_manager().redis.scan_iter.return_value = []
         response = self.app.get(reverse('home'))
         response.form['description'] = ''
         response = response.form.submit()
@@ -42,6 +62,9 @@ class HomeTest(WebTest):
 
 @mock.patch('redis.from_url')
 class DiceRollViewTest(WebTest):
+    def setUp(self):
+        DiceRollManager._instance = None
+        
     def test_get_view(self, redis):
         roll = DiceRoll('description test')
         DiceRollManager.get_manager().redis.get.return_value = pickle.dumps(roll)
